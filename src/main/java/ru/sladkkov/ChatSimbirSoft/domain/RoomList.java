@@ -1,11 +1,15 @@
 package ru.sladkkov.ChatSimbirSoft.domain;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 public class RoomList {
     @Id
