@@ -11,10 +11,12 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table(name = "room_list")
 public class RoomList {
     @Id
     private Long userId;
-    private Timestamp ban_time;
+    @Column(name = "ban_time")
+    private Timestamp banTime;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roles")

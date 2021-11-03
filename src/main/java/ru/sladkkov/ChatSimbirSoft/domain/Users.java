@@ -11,15 +11,19 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Table(name = "users")
 public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @Column(name = "user_login")
     private String userLogin;
 
+    @Column(name = "user_name")
     private String userName;
 
+    @Column(name = "user_password")
     private String userPassword;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users")

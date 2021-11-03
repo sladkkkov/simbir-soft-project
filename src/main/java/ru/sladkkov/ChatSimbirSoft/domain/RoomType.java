@@ -10,10 +10,11 @@ import javax.persistence.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Table
 public class RoomType {
     @Id
     private Long roomId;
-
+    @Column(name = "room_type")
     private String roomType;
 
     @OneToOne(fetch = FetchType.EAGER)

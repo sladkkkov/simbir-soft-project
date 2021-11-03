@@ -11,14 +11,17 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@Table(name = "room")
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long roomId;
 
-    private Long owner_id;
+    @Column(name =  "owner_id")
+    private Long ownerId;
 
-    private String room_name;
+    @Column(name =  "room_name")
+    private String roomName;
 
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "room")
