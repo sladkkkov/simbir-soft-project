@@ -2,24 +2,23 @@ package ru.sladkkov.ChatSimbirSoft.dto.request;
 
 import lombok.Data;
 import ru.sladkkov.ChatSimbirSoft.domain.Message;
-import ru.sladkkov.ChatSimbirSoft.dto.response.MessageDto;
 
 @Data
 public class MessageRequestDto {
-    private int message_id;
-    private int user_id;
-    private int room_id;
+    private long messageId;
+    private long userId;
+    private long roomId;
 
     public Message toMessage() {
         Message message = new Message();
-        message.setMessage_id(message_id);
+        message.setMessageId(messageId);
 
         return message;
     }
 
-    public MessageDto fromMessage(Message message) {
-        MessageDto messageDto = new MessageDto();
-        messageDto.setMessage_id(message.getMessage_id());
-        return messageDto;
+    public MessageRequestDto fromMessage(Message message) {
+        MessageRequestDto messageRequestDto = new MessageRequestDto();
+        messageRequestDto.setMessageId(message.getMessageId());
+        return messageRequestDto;
     }
 }

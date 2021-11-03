@@ -7,14 +7,14 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 import java.sql.Timestamp;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@Data
 public class Message {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int message_id;
+    private Long messageId;
 
     private boolean read;
 

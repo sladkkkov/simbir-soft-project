@@ -5,7 +5,7 @@ import ru.sladkkov.ChatSimbirSoft.domain.Users;
 
 @Data
 public class UsersDto {
-    private int userId;
+    private long userId;
     private String userName;
 
     public Users ToUser() {

@@ -12,7 +12,7 @@ import javax.persistence.*;
 @Entity
 public class RoomType {
     @Id
-    private int roomId;
+    private Long roomId;
 
     private String roomType;
 

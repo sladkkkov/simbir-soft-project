@@ -5,9 +5,9 @@ import ru.sladkkov.ChatSimbirSoft.domain.Room;
 
 @Data
 public class RoomDto {
-    private int roomId;
+    private long roomId;
 
-    private int ownerId;
+    private long ownerId;
 
     private String roomName;
 

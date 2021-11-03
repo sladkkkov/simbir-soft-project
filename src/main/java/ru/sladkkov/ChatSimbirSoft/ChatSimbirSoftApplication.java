@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ChatSimbirSoftApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ChatSimbirSoftApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(ChatSimbirSoftApplication.class, args);
+    }
 
 }

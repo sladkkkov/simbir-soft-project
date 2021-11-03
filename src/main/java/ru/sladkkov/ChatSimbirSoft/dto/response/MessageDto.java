@@ -7,7 +7,7 @@ import java.sql.Timestamp;
 
 @Data
 public class MessageDto {
-    private int message_id;
+    private long messageId;
 
     private boolean read;
 
@@ -17,13 +17,13 @@ public class MessageDto {
 
     private String messageText;
 
-    private int user_id;
+    private long userId;
 
-    private int room_id;
+    private long roomId;
 
     public Message toMessage(){
         Message message = new Message();
-        message.setMessage_id(message_id);
+        message.setMessageId(messageId);
         message.setMessageText(messageText);
         message.setRead(read);
         message.setDeleted(deleted);
@@ -33,7 +33,7 @@ public class MessageDto {
 
     public MessageDto fromMessage(Message message){
         MessageDto messageDto = new MessageDto();
-        messageDto.setMessage_id(message.getMessage_id());
+        messageDto.setMessageId(message.getMessageId());
         messageDto.setRead(message.isRead());
         messageDto.setDeleted(message.isDeleted());
         messageDto.setMessageTime(message.getMessageTime());

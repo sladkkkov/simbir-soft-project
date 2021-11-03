@@ -14,9 +14,9 @@ import java.util.List;
 public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int roomId;
+    private Long roomId;
 
-    private int owner_id;
+    private Long owner_id;
 
     private String room_name;
 

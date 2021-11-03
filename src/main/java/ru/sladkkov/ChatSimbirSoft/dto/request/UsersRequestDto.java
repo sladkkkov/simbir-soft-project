@@ -2,11 +2,10 @@ package ru.sladkkov.ChatSimbirSoft.dto.request;
 
 import lombok.Data;
 import ru.sladkkov.ChatSimbirSoft.domain.Users;
-import ru.sladkkov.ChatSimbirSoft.dto.response.UsersDto;
 
 @Data
 public class UsersRequestDto {
-    private int userId;
+    private long userId;
 
     public Users ToUser() {
         Users user = new Users();
@@ -14,9 +13,9 @@ public class UsersRequestDto {
         return user;
     }
 
-    public static UsersDto fromUser(Users users) {
-        UsersDto usersDto = new UsersDto();
-        usersDto.setUserId(users.getUserId());
-        return usersDto;
+    public static UsersRequestDto fromUser(Users users) {
+        UsersRequestDto usersRequestDto = new UsersRequestDto();
+        usersRequestDto.setUserId(users.getUserId());
+        return usersRequestDto;
     }
 }

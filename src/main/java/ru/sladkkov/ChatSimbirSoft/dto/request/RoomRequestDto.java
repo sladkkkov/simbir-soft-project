@@ -2,11 +2,10 @@ package ru.sladkkov.ChatSimbirSoft.dto.request;
 
 import lombok.Data;
 import ru.sladkkov.ChatSimbirSoft.domain.Room;
-import ru.sladkkov.ChatSimbirSoft.dto.response.RoomDto;
 
 @Data
 public class RoomRequestDto {
-    private int roomId;
+    private long roomId;
 
     public Room ToRoom() {
         Room room = new Room();
@@ -14,9 +13,9 @@ public class RoomRequestDto {
         return room;
     }
 
-    public static RoomDto fromRoom(Room room) {
-        RoomDto roomDto = new RoomDto();
-        roomDto.setRoomId(room.getRoomId());
-        return roomDto;
+    public static RoomRequestDto fromRoom(Room room) {
+        RoomRequestDto roomRequestDto = new RoomRequestDto();
+        roomRequestDto.setRoomId(room.getRoomId());
+        return roomRequestDto;
     }
 }

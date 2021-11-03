@@ -13,7 +13,7 @@ import java.sql.Timestamp;
 @Entity
 public class RoomList {
     @Id
-    private int userId;
+    private Long userId;
     private Timestamp ban_time;
 
     @ManyToOne(fetch = FetchType.EAGER)
