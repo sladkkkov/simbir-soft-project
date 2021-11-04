@@ -14,16 +14,16 @@ public class RoomDto {
     public Room ToRoom() {
         Room room = new Room();
         room.setRoomId(roomId);
-        room.setOwner_id(ownerId);
-        room.setRoom_name(roomName);
+        room.setOwnerId(ownerId);
+        room.setRoomName(roomName);
         return room;
     }
 
     public static RoomDto fromRoom(Room room) {
         RoomDto roomDto = new RoomDto();
         roomDto.setRoomId(room.getRoomId());
-        roomDto.setOwnerId(room.getOwner_id());
-        roomDto.setRoomName(room.getRoom_name());
+        roomDto.setOwnerId(room.getOwnerId());
+        roomDto.setRoomName(room.getRoomName());
         return roomDto;
     }
 }
