@@ -7,7 +7,7 @@ import ru.sladkkov.ChatSimbirSoft.domain.Room;
 public class RoomRequestDto {
     private long roomId;
 
-    public Room ToRoom() {
+    public Room toRoom() {
         Room room = new Room();
         room.setRoomId(roomId);
         return room;

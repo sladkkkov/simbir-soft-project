@@ -7,7 +7,7 @@ import ru.sladkkov.ChatSimbirSoft.domain.Users;
 public class UsersRequestDto {
     private long userId;
 
-    public Users ToUser() {
+    public Users toUser() {
         Users user = new Users();
         user.setUserId(userId);
         return user;

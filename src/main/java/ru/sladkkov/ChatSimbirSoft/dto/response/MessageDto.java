@@ -19,8 +19,6 @@ public class MessageDto {
 
     private long userId;
 
-    private long roomId;
-
     public Message toMessage(){
         Message message = new Message();
         message.setMessageId(messageId);
@@ -31,7 +29,7 @@ public class MessageDto {
         return message;
     }
 
-    public MessageDto fromMessage(Message message){
+    public static MessageDto fromMessage(Message message){
         MessageDto messageDto = new MessageDto();
         messageDto.setMessageId(message.getMessageId());
         messageDto.setRead(message.isRead());

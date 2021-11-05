@@ -11,7 +11,7 @@ public class RoomDto {
 
     private String roomName;
 
-    public Room ToRoom() {
+    public Room toRoom() {
         Room room = new Room();
         room.setRoomId(roomId);
         room.setOwnerId(ownerId);
