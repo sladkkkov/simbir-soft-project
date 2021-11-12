@@ -15,12 +15,15 @@ import java.sql.Timestamp;
 public class RoomList {
     @Id
     private Long userId;
+
     @Column(name = "ban_time")
     private Timestamp banTime;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "roles")
     private Roles roles;
+
+
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId

@@ -1,11 +1,11 @@
-INSERT INTO users (user_login, user_name, user_password)
-VALUES ('sladkkov', 'Danila', 'Danila123');
+INSERT INTO users (user_login, user_name, user_password, active)
+VALUES ('sladkkov', 'Danila', 'Danila123',true);
 
-INSERT INTO users (user_login, user_name, user_password)
-VALUES ('Maksim', 'maksim', '1q');
+INSERT INTO users (user_login, user_name, user_password, active)
+VALUES ('Maksim', 'maksim', '1q',true);
 
-INSERT INTO users (user_login, user_name, user_password)
-VALUES ('sasha', 'Sasha', '2q');
+INSERT INTO users (user_login, user_name, user_password, active)
+VALUES ('sasha', 'Sasha', '2q',false);
 
 INSERT INTO roles (role)
 VALUES ('ADMIN');
@@ -15,4 +15,3 @@ VALUES ('MODERATOR');
 
 INSERT INTO roles (role)
 VALUES ('USER');
-

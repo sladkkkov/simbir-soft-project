@@ -25,6 +25,7 @@ create table room
     room_id   bigserial not null,
     owner_id  int8   not null,
     room_name varchar(255)  not null,
+    type_room varchar(16) not null,
     primary key (room_id)
 );
 create table room_list
@@ -35,15 +36,11 @@ create table room_list
     room_id  int8 not null,
     primary key (user_id, room_id)
 );
-create table room_type
-(
-    room_id   int8 not null,
-    room_type varchar(16)  not null,
-    primary key (room_id)
-);
+
 create table users
 (
     user_id       bigserial not null,
+    active boolean not null,
     user_login    varchar(32) unique not null,
     user_name     varchar(64)  not null,
     user_password varchar(32) not null,
@@ -59,5 +56,3 @@ alter table room_list
     add constraint fk_room_id foreign key (room_id) references room;
 alter table room_list
     add constraint fk_users_id foreign key (user_id) references users;
-alter table room_type
-    add constraint fk_room_id foreign key (room_id) references room

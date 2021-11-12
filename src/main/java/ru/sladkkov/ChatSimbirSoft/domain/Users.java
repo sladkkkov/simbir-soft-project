@@ -26,6 +26,9 @@ public class Users {
     @Column(name = "user_password")
     private String userPassword;
 
+    @Column(name = "active")
+    private boolean active;
+
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users")
     private List<Message> messageList;
 

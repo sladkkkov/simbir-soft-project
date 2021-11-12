@@ -23,13 +23,10 @@ public class Room {
     @Column(name =  "room_name")
     private String roomName;
 
+    @Column(name = "type_room")
+    private  String roomType;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "room")
     private List<Message> messageList;
-
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "room")
-    private RoomType roomType;
-
-
 }
 
