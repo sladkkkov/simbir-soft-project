@@ -3,16 +3,19 @@ package ru.sladkkov.ChatSimbirSoft.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.sladkkov.ChatSimbirSoft.domain.Roles;
+
+import java.sql.Timestamp;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class RoomDto {
+public class RoomListDto {
 
-    private long ownerId;
+    private Long userId;
 
-    private String roomName;
+    private Timestamp banTime;
 
-    private String roomType;
+    private Roles roles;
 
 }

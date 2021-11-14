@@ -6,6 +6,7 @@ import ru.sladkkov.ChatSimbirSoft.domain.Users;
 import ru.sladkkov.ChatSimbirSoft.dto.response.UsersDto;
 
 import java.util.List;
+
 @Mapper
 public interface UsersMapper {
 
@@ -15,5 +16,8 @@ public interface UsersMapper {
 
     Users toEntity(UsersDto userDto);
 
-    List<UsersDto> toModelList(List<Users> users);
+     List<UsersDto> toModelList(List<Users> users);
+
+
+
 }

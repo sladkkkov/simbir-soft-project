@@ -33,5 +33,5 @@ public class Users {
     private List<Message> messageList;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users")
-    private List<RoomList> roomLists;
+    private List<RoomList> roomList;
 }

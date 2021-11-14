@@ -7,6 +7,7 @@ import ru.sladkkov.ChatSimbirSoft.domain.Room;
 import ru.sladkkov.ChatSimbirSoft.dto.response.RoomDto;
 
 import java.util.List;
+
 @Mapper
 public interface RoomMapper {
 
