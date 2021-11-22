@@ -12,8 +12,8 @@ import ru.sladkkov.ChatSimbirSoft.exception.UserBannedException;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
-import ru.sladkkov.ChatSimbirSoft.service.mapper.RoomListMapper;
-import ru.sladkkov.ChatSimbirSoft.service.mapper.RoomMapper;
+import ru.sladkkov.ChatSimbirSoft.mapper.RoomListMapper;
+import ru.sladkkov.ChatSimbirSoft.mapper.RoomMapper;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -43,8 +43,8 @@ public class RoomListService {
         return RoomListMapper.INSTANCE.toModelList(roomListRepo.findAll());
     }
 
-    public RoomListDto getRoomListById(Long id) throws RoomListNotFoundException {
-        RoomList roomList = roomListRepo.findById(id).orElse(null);
+    public RoomListDto getRoomListByUserId(Long userId, Long roomId) throws RoomListNotFoundException {
+        RoomList roomList = roomListRepo.getByUserIdAndRoomRoomId(userId,roomId);
         if (roomList == null) {
             log.error("IN getRoomListById roomLists not found");
             throw new RoomListNotFoundException("Списков не найдено");
@@ -52,9 +52,18 @@ public class RoomListService {
         log.info("IN getRoomListById roomLists successfully founded");
         return RoomListMapper.INSTANCE.toModel(roomList);
     }
+    public List<RoomListDto> getAllRoomByUserId(Long userId) throws RoomListNotFoundException {
+        List<RoomList> roomList = roomListRepo.getAllByUserId(userId);
+        if (roomList == null) {
+            log.error("IN getRoomListById roomLists not found");
+            throw new RoomListNotFoundException("Списков не найдено");
+        }
+        log.info("IN getRoomListById roomLists successfully founded");
+        return RoomListMapper.INSTANCE.toModelList(roomList);
+    }
 
     public void createRoomList(String name, String typeRoom, Long userId) throws RoomAlreadyCreatedException, UserBannedException, LogicException {
-        if (!userRepo.findById(userId).orElse(null).isActive()) {
+        if (!userRepo.findById(userId).orElse(null).getStatus().name().equals("ACTIVE")) {
             log.error("IN createRoom create room failed, user don't Active");
             throw new UserBannedException("Пользователь забанен на сайте");
         }

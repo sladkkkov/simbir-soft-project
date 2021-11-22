@@ -8,7 +8,7 @@ import ru.sladkkov.ChatSimbirSoft.exception.*;
 import ru.sladkkov.ChatSimbirSoft.repository.MessageRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
-import ru.sladkkov.ChatSimbirSoft.service.mapper.MessageMapper;
+import ru.sladkkov.ChatSimbirSoft.mapper.MessageMapper;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -64,8 +64,8 @@ public class MessageService {
             log.error("IN deleteById message dont found");
             throw new MessageNotFoundException("Такого сообщения не существует");
         }
-        if(roomListRepo.findByRoom_RoomIdAndUserId(userId,message.getRoom().getRoomId()).getRoles().getRole() != "MODERATOR"
-                || roomListRepo.findByRoom_RoomIdAndUserId(userId,message.getRoom().getRoomId()).getRoles().getRole() != "ADMIN" ){
+        if(roomListRepo.getByUserIdAndRoomRoomId(userId,message.getRoom().getRoomId()).getRoles().getRole() != "MODERATOR"
+                || roomListRepo.getByUserIdAndRoomRoomId(userId,message.getRoom().getRoomId()).getRoles().getRole() != "ADMIN" ){
             log.error("IN deleteById no access");
             throw new NoAccessException("Нет прав на удаление сообщения");
         }
@@ -83,11 +83,11 @@ public class MessageService {
             log.error("IN createMessage message already created");
             throw new MessageAlreadyCreatedException("Сообщение c таким id уже существует");
         }
-        if(roomListRepo.findByRoom_RoomIdAndUserId(message.getUsers().getUserId(),message.getRoom().getRoomId()) == null){
+        if(roomListRepo.getByUserIdAndRoomRoomId(message.getUsers().getUserId(),message.getRoom().getRoomId()) == null){
             log.error("IN createMessage user dont consist of room");
             throw new LogicException("Пользователь не добавлен в комнату");
         }
-        if(!message.getUsers().isActive()){
+        if(!message.getUsers().getStatus().name().equals("ACTIVE")){
             log.error("IN createMessage user blocked");
             throw new UserBannedException("Пользователь заблокирован на сайте");
         }

@@ -1,4 +1,4 @@
-package ru.sladkkov.ChatSimbirSoft.service.mapper;
+package ru.sladkkov.ChatSimbirSoft.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -17,7 +17,4 @@ public interface UsersMapper {
     Users toEntity(UsersDto userDto);
 
      List<UsersDto> toModelList(List<Users> users);
-
-
-
 }

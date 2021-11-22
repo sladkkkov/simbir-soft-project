@@ -38,7 +38,7 @@ public class RoomController {
         }
     }
 
-    @PostMapping("/create/{name}/{typeRoom}/{userId}")
+    @PostMapping("/create/{name}/{userId}/{typeRoom}")
     public ResponseEntity createRoom(@PathVariable String name, @PathVariable String typeRoom, @PathVariable Long userId) {
         try {
             roomService.createRoom(name, typeRoom, userId);

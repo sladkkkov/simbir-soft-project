@@ -5,11 +5,11 @@ import org.springframework.stereotype.Service;
 import ru.sladkkov.ChatSimbirSoft.domain.Room;
 import ru.sladkkov.ChatSimbirSoft.dto.response.RoomDto;
 import ru.sladkkov.ChatSimbirSoft.exception.*;
+import ru.sladkkov.ChatSimbirSoft.mapper.RoomMapper;
 import ru.sladkkov.ChatSimbirSoft.repository.RolesRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
-import ru.sladkkov.ChatSimbirSoft.service.mapper.RoomMapper;
 
 import javax.transaction.Transactional;
 import java.util.List;
@@ -59,12 +59,18 @@ public class RoomService {
      * Доступен всем кроме заблокированного пользователя
      */
     public void createRoom(String name, String typeRoom, Long userId) throws RoomAlreadyCreatedException, UserBannedException {
-        if (!userRepo.findById(userId).orElse(null).isActive()) {
+        if (!userRepo.findById(userId).orElse(null).getStatus().name().equals("ACTIVE")) {
             log.error("IN createRoom create room failed, user don't Active");
             throw new UserBannedException("Пользователь забанен на сайте");
         }
-        roomRepo.save(RoomMapper.INSTANCE.toEntity(new RoomDto(userId,name,typeRoom)));
-        log.info("IN createRoom room created");
+        if (typeRoom == "c"){
+            RoomDto roomDto = new RoomDto(userId,name,"private");
+            log.info("IN createRoom room private room created");
+
+        }
+        RoomDto roomDto = new RoomDto(userId,name,"public");
+        roomRepo.save(RoomMapper.INSTANCE.toEntity(roomDto));
+        log.info("IN createRoom room public room created");
     }
     /**
      * Метод удаления комнаты по id.
@@ -75,7 +81,7 @@ public class RoomService {
             log.error("In deleteRoom room not found");
             throw new RoomNotFoundException("Комната не найдена");
         }
-        if(roomListRepo.findByRoom_RoomIdAndUserId(userId,roomId).getRoles().getRole() != "ADMIN"
+        if(roomListRepo.getByUserIdAndRoomRoomId(userId,roomId).getRoles().getRole() != "ADMIN"
                 ||  userId != roomRepo.findById(userId).orElse(null).getOwnerId()){
             log.error("IN renameRoom no access");
             throw new NoAccessException("Нет прав");
@@ -97,7 +103,7 @@ public class RoomService {
             log.error("IN renameRoom room is already so named");
             throw new LogicException("Комната уже так названа");
         }
-        if(roomListRepo.findByRoom_RoomIdAndUserId(userId,roomId).getRoles().getRole() != "ADMIN"
+        if(roomListRepo.getByUserIdAndRoomRoomId(userId,roomId).getRoles().getRole() != "ADMIN"
                 ||  userId != roomRepo.findById(userId).orElse(null).getOwnerId()){
             log.error("IN renameRoom no access");
             throw new NoAccessException("Нет прав");

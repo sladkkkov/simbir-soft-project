@@ -27,7 +27,7 @@ public class RoomList {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @MapsId
-    @JoinColumn(name = "userId")
+    @JoinColumn(name = "user_id")
     private Users users;
 
     @ManyToOne(fetch = FetchType.EAGER)

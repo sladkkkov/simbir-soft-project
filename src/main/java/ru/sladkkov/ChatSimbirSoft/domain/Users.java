@@ -26,8 +26,13 @@ public class Users {
     @Column(name = "user_password")
     private String userPassword;
 
-    @Column(name = "active")
-    private boolean active;
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "status")
+    private Status status;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "role")
+    private Role role;
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users")
     private List<Message> messageList;

@@ -1,4 +1,4 @@
-package ru.sladkkov.ChatSimbirSoft.service.mapper;
+package ru.sladkkov.ChatSimbirSoft.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

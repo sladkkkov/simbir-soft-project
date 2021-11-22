@@ -2,6 +2,7 @@ package ru.sladkkov.ChatSimbirSoft.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.sladkkov.ChatSimbirSoft.dto.response.UsersDto;
 import ru.sladkkov.ChatSimbirSoft.exception.LogicException;
@@ -21,6 +22,7 @@ public class UsersController {
         this.usersService = usersService;
     }
 
+    @PreAuthorize("hasAnyAuthority('user') OR hasAnyAuthority('admin')")
     @GetMapping("/get")
     public ResponseEntity getUserById(@RequestParam Long id) {
         try {
@@ -31,7 +33,7 @@ public class UsersController {
             return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
         }
     }
-
+    @PreAuthorize("hasAnyAuthority('user') OR hasAnyAuthority('admin')")
     @GetMapping("/get-all")
     public ResponseEntity getAllUser() {
         try {
@@ -42,7 +44,7 @@ public class UsersController {
             return ResponseEntity.badRequest().body("Непонятная ошибка");
         }
     }
-
+    @PreAuthorize("hasAnyAuthority('admin')")
     @DeleteMapping("/remove")
     public ResponseEntity delete(@RequestParam Long id) {
         try {
@@ -55,6 +57,7 @@ public class UsersController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PostMapping("/create")
     public ResponseEntity createUser(@RequestBody UsersDto usersDto) {
         try {
@@ -67,6 +70,7 @@ public class UsersController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/ban/{userId}/{moderatorOrAdministratorId}/{roomId}")
     public ResponseEntity blockUser(@PathVariable Long userId, @PathVariable Long moderatorOrAdministratorId, @PathVariable Long roomId) {
         try {
@@ -79,6 +83,7 @@ public class UsersController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/unban/{userId}/{roomId}/{moderatorOrAdministratorId}")
     public ResponseEntity unblockUser(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long moderatorOrAdministratorId) {
         try {
@@ -91,26 +96,26 @@ public class UsersController {
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/set-moderator/{userId}/{roomId}/{administratorId}")
     public ResponseEntity setModerator(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long administratorId) {
         try {
             usersService.setModerator(userId, administratorId, roomId);
-            return ResponseEntity.ok("Пользователь успешно разбанен");
+            return ResponseEntity.ok("Пользователь успешно получил права модератора");
         } catch (UserNotFoundException | NoAccessException | LogicException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
         }
     }
 
+    @PreAuthorize("hasAnyAuthority('admin')")
     @PutMapping("/delete-moderator/{userId}/{roomId}/{administratorId}")
     public ResponseEntity deleteModerator(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long administratorId) {
         try {
             usersService.deleteModerator(userId, administratorId, roomId);
-            return ResponseEntity.ok("Пользователь успешно разбанен");
+            return ResponseEntity.ok("Пользователь успешно утратил права модератора ");
         } catch (UserNotFoundException | NoAccessException | LogicException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
+        }catch (Exception e) {
             return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
         }
     }
