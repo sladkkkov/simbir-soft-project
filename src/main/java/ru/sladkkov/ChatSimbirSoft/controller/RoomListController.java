@@ -1,8 +1,11 @@
 package ru.sladkkov.ChatSimbirSoft.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import ru.sladkkov.ChatSimbirSoft.exception.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.sladkkov.ChatSimbirSoft.exception.RoomListNotFoundException;
 import ru.sladkkov.ChatSimbirSoft.service.RoomListService;
 
 @RestController
@@ -16,37 +19,20 @@ public class RoomListController {
 
 
     @GetMapping("get-all")
-    public ResponseEntity getAllRoom() {
-        try {
-            return ResponseEntity.ok(roomListRepo.getAllRoomList());
-        } catch (RoomListNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
+    public ResponseEntity getAllRoom() throws RoomListNotFoundException {
+
+        return ResponseEntity.ok(roomListRepo.getAllRoomList());
     }
 
     @GetMapping("/get/{userId}/{roomId}")
-    public ResponseEntity getRoomById(@PathVariable Long userId,@PathVariable Long roomId) {
-        try {
-            return ResponseEntity.ok(roomListRepo.getRoomListByUserId(userId,roomId));
-        } catch (RoomListNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
+    public ResponseEntity getRoomById(@PathVariable Long userId, @PathVariable Long roomId) throws RoomListNotFoundException {
+        return ResponseEntity.ok(roomListRepo.getRoomListByUserId(userId, roomId));
     }
 
 
     @GetMapping("/get-by-id/{id}")
-    public ResponseEntity getAllRoomById(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(roomListRepo.getAllRoomByUserId(id));
-        } catch (RoomListNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
+    public ResponseEntity getAllRoomById(@PathVariable Long id) throws RoomListNotFoundException {
+        return ResponseEntity.ok(roomListRepo.getAllRoomByUserId(id));
     }
 
 }

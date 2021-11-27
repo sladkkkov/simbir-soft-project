@@ -22,101 +22,68 @@ public class UsersController {
         this.usersService = usersService;
     }
 
-    @PreAuthorize("hasAnyAuthority('user') OR hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('USER') OR hasAnyAuthority('ADMIN')")
     @GetMapping("/get")
-    public ResponseEntity getUserById(@RequestParam Long id) {
-        try {
-            return ResponseEntity.ok(usersService.getById(id));
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    public ResponseEntity getUserById(@RequestParam Long id) throws UserNotFoundException {
+        return ResponseEntity.ok(usersService.getById(id));
     }
-    @PreAuthorize("hasAnyAuthority('user') OR hasAnyAuthority('admin')")
+
+    @PreAuthorize("hasAnyAuthority('USER') OR hasAnyAuthority('ADMIN')")
     @GetMapping("/get-all")
-    public ResponseEntity getAllUser() {
-        try {
-            return ResponseEntity.ok(usersService.getAll());
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
+    public ResponseEntity getAllUser() throws UserNotFoundException {
+        return ResponseEntity.ok(usersService.getAll());
     }
-    @PreAuthorize("hasAnyAuthority('admin')")
+
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @DeleteMapping("/remove")
-    public ResponseEntity delete(@RequestParam Long id) {
-        try {
-            usersService.deleteUser(id);
-            return ResponseEntity.ok("Пользователь успешно удалён");
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    public ResponseEntity delete(@RequestParam Long id) throws UserNotFoundException {
+
+        usersService.deleteUser(id);
+        return ResponseEntity.ok("Пользователь успешно удалён");
+
     }
 
-    @PreAuthorize("hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PostMapping("/create")
-    public ResponseEntity createUser(@RequestBody UsersDto usersDto) {
-        try {
-            usersService.createUsers(usersDto);
-            return ResponseEntity.ok("Пользователь успешно создан");
-        } catch (UserAlreadyCreatedException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    public ResponseEntity createUser(@RequestBody UsersDto usersDto) throws UserAlreadyCreatedException {
+
+        usersService.createUsers(usersDto);
+        return ResponseEntity.ok("Пользователь успешно создан");
     }
 
-    @PreAuthorize("hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/ban/{userId}/{moderatorOrAdministratorId}/{roomId}")
-    public ResponseEntity blockUser(@PathVariable Long userId, @PathVariable Long moderatorOrAdministratorId, @PathVariable Long roomId) {
-        try {
-            usersService.blockUser(userId, moderatorOrAdministratorId, roomId);
-            return ResponseEntity.ok("Пользователь успешно забанен");
-        } catch (UserNotFoundException | NoAccessException | LogicException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    public ResponseEntity blockUser(@PathVariable Long userId, @PathVariable Long moderatorOrAdministratorId, @PathVariable Long roomId) throws UserNotFoundException, NoAccessException, LogicException {
+
+        usersService.blockUser(userId, moderatorOrAdministratorId, roomId);
+        return ResponseEntity.ok("Пользователь успешно забанен");
+
     }
 
-    @PreAuthorize("hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/unban/{userId}/{roomId}/{moderatorOrAdministratorId}")
-    public ResponseEntity unblockUser(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long moderatorOrAdministratorId) {
-        try {
-            usersService.unblockUser(userId, moderatorOrAdministratorId, roomId);
-            return ResponseEntity.ok("Пользователь успешно разбанен");
-        } catch (UserNotFoundException | NoAccessException | LogicException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    public ResponseEntity unblockUser(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long moderatorOrAdministratorId) throws UserNotFoundException, NoAccessException, LogicException {
+
+        usersService.unblockUser(userId, moderatorOrAdministratorId, roomId);
+        return ResponseEntity.ok("Пользователь успешно разбанен");
+
     }
 
-    @PreAuthorize("hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/set-moderator/{userId}/{roomId}/{administratorId}")
-    public ResponseEntity setModerator(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long administratorId) {
-        try {
-            usersService.setModerator(userId, administratorId, roomId);
-            return ResponseEntity.ok("Пользователь успешно получил права модератора");
-        } catch (UserNotFoundException | NoAccessException | LogicException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    public ResponseEntity setModerator(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long administratorId) throws UserNotFoundException, NoAccessException, LogicException {
+
+        usersService.setModerator(userId, administratorId, roomId);
+        return ResponseEntity.ok("Пользователь успешно получил права модератора");
+
     }
 
-    @PreAuthorize("hasAnyAuthority('admin')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/delete-moderator/{userId}/{roomId}/{administratorId}")
-    public ResponseEntity deleteModerator(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long administratorId) {
-        try {
-            usersService.deleteModerator(userId, administratorId, roomId);
-            return ResponseEntity.ok("Пользователь успешно утратил права модератора ");
-        } catch (UserNotFoundException | NoAccessException | LogicException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    public ResponseEntity deleteModerator(@PathVariable Long userId, @PathVariable Long roomId, @PathVariable Long administratorId) throws UserNotFoundException, NoAccessException, LogicException {
+
+        usersService.deleteModerator(userId, administratorId, roomId);
+        return ResponseEntity.ok("Пользователь успешно утратил права модератора ");
+
     }
 }

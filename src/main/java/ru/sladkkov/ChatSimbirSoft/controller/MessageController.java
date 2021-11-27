@@ -18,59 +18,28 @@ public class MessageController {
     }
 
     @GetMapping("/get-all")
-    public ResponseEntity getAllMessage() {
-        try {
+    public ResponseEntity getAllMessage() throws MessageNotFoundException {
             return ResponseEntity.ok(messageService.getAllMessage());
-        } catch (MessageNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
     }
 
     @GetMapping("/get")
-    public ResponseEntity getMessageById(@RequestParam Long id) {
-        try {
+    public ResponseEntity getMessageById(@RequestParam Long id) throws MessageNotFoundException {
             return ResponseEntity.ok(messageService.getMessageById(id));
-        } catch (MessageNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
     }
 
     @DeleteMapping("/remove")
-    public ResponseEntity deleteById(@PathVariable Long  messageId, @PathVariable Long userId) {
-        try {
+    public ResponseEntity deleteById(@PathVariable Long  messageId, @PathVariable Long userId) throws MessageNotFoundException, NoAccessException {
             messageService.deleteById(messageId,userId);
             return ResponseEntity.ok("Сообщение успешно удаленно");
-        } catch (MessageNotFoundException | NoAccessException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
     }
 
     @PostMapping("/send")
-    public ResponseEntity createMessage(@RequestBody MessageDto messageDto, @PathVariable Long room_id, Long user_id) {
-        try {
+    public ResponseEntity createMessage(@RequestBody MessageDto messageDto, @PathVariable Long room_id, Long user_id) throws MessageAlreadyCreatedException, LogicException, UserBannedException {
             messageService.createMessage(messageDto);
             return ResponseEntity.ok("Сообщение успешно создано");
-        } catch (MessageAlreadyCreatedException | UserBannedException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
     }
     @GetMapping("/get-all/roomId")
-    public ResponseEntity getAllMessageByRoom(@PathVariable Long roomId) {
-        try {
+    public ResponseEntity getAllMessageByRoom(@PathVariable Long roomId) throws MessageNotFoundException, RoomNotFoundException {
             return ResponseEntity.ok(messageService.getAllMessageByRoomId(roomId));
-        } catch (RoomNotFoundException | MessageNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-        catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
     }
 }

@@ -9,6 +9,7 @@ import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 
 @Service("userDetailsServiceImpl")
 public class UserDetailsServiceImpl implements UserDetailsService {
+
     private final UserRepo userRepo;
 
     public UserDetailsServiceImpl(UserRepo userRepo) {

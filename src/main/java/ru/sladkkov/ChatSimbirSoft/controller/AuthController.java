@@ -15,6 +15,7 @@ import ru.sladkkov.ChatSimbirSoft.domain.Users;
 import ru.sladkkov.ChatSimbirSoft.dto.request.AuthenticationRequestDto;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 import ru.sladkkov.ChatSimbirSoft.security.JwtTokenProvider;
+import ru.sladkkov.ChatSimbirSoft.service.AuthService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

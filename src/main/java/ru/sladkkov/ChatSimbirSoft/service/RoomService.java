@@ -76,15 +76,10 @@ public class RoomService {
      * Метод удаления комнаты по id.
      * Доступно для ADMIN или Владельца комнаты.
      */
-    public void deleteRoom(Long roomId, Long userId) throws RoomNotFoundException, NoAccessException {
+    public void deleteRoom(Long roomId) throws RoomNotFoundException, NoAccessException {
         if (roomRepo.findById(roomId).orElse(null) == null) {
             log.error("In deleteRoom room not found");
             throw new RoomNotFoundException("Комната не найдена");
-        }
-        if(roomListRepo.getByUserIdAndRoomRoomId(userId,roomId).getRoles().getRole() != "ADMIN"
-                ||  userId != roomRepo.findById(userId).orElse(null).getOwnerId()){
-            log.error("IN renameRoom no access");
-            throw new NoAccessException("Нет прав");
         }
         log.info("In deleteRoom room successful deleted");
         roomRepo.deleteById(roomId);
@@ -93,7 +88,7 @@ public class RoomService {
      * Метод переименования комнаты по id.
      * Доступно для ADMIN или Владельца комнаты.
      */
-    public void renameRoom(Long roomId,Long userId, String name) throws RoomNotFoundException, LogicException, NoAccessException {
+    public void renameRoom(Long roomId, String name) throws RoomNotFoundException, LogicException, NoAccessException {
         Room room = roomRepo.findById(roomId).orElse(null);
         if(room == null){
             log.error("IN renameRoom room not found");
@@ -102,11 +97,6 @@ public class RoomService {
         if(room.getRoomName() == name){
             log.error("IN renameRoom room is already so named");
             throw new LogicException("Комната уже так названа");
-        }
-        if(roomListRepo.getByUserIdAndRoomRoomId(userId,roomId).getRoles().getRole() != "ADMIN"
-                ||  userId != roomRepo.findById(userId).orElse(null).getOwnerId()){
-            log.error("IN renameRoom no access");
-            throw new NoAccessException("Нет прав");
         }
         log.info("IN renameRoom room renamed");
         room.setRoomName(name);

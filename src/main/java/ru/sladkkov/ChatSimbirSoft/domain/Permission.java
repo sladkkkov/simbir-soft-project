@@ -1,8 +1,8 @@
 package ru.sladkkov.ChatSimbirSoft.domain;
 
 public enum Permission {
-  USER("user"),
-  ADMIN("admin");
+  USER("USER"),
+  ADMIN("ADMIN");
 private final String permission;
 
     Permission(String permission) {

@@ -3,6 +3,8 @@ package ru.sladkkov.ChatSimbirSoft.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.sladkkov.ChatSimbirSoft.domain.Role;
+import ru.sladkkov.ChatSimbirSoft.domain.Status;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +19,8 @@ public class UsersDto {
 
     private String userPassword;
 
-    private boolean active;
+    private Role role;
+
+    private Status status;
 
 }

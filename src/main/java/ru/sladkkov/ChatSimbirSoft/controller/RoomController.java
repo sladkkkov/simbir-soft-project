@@ -2,6 +2,7 @@ package ru.sladkkov.ChatSimbirSoft.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import ru.sladkkov.ChatSimbirSoft.exception.*;
 import ru.sladkkov.ChatSimbirSoft.service.RoomService;
@@ -17,60 +18,35 @@ public class RoomController {
     }
 
     @GetMapping("get-all")
-    public ResponseEntity getAllRoom() {
-        try {
-            return ResponseEntity.ok(roomService.getAllRoom());
-        } catch (RoomNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
+    @PreAuthorize("hasAnyAuthority('USER') OR hasAnyAuthority('ADMIN')")
+    public ResponseEntity getAllRoom() throws RoomNotFoundException {
+        return ResponseEntity.ok(roomService.getAllRoom());
     }
 
     @GetMapping("/get")
-    public ResponseEntity getRoomById(@RequestParam Long id) {
-        try {
-            return ResponseEntity.ok(roomService.getRoomById(id));
-        } catch (RoomNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Непонятная ошибка");
-        }
+    @PreAuthorize("hasAnyAuthority('USER') OR hasAnyAuthority('ADMIN')")
+    public ResponseEntity getRoomById(@RequestParam Long id) throws RoomNotFoundException {
+        return ResponseEntity.ok(roomService.getRoomById(id));
     }
 
     @PostMapping("/create/{name}/{userId}/{typeRoom}")
-    public ResponseEntity createRoom(@PathVariable String name, @PathVariable String typeRoom, @PathVariable Long userId) {
-        try {
-            roomService.createRoom(name, typeRoom, userId);
-            return ResponseEntity.ok("Комната успешно создана");
-        } catch (RoomAlreadyCreatedException | UserBannedException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity createRoom(@PathVariable String name, @PathVariable String typeRoom, @PathVariable Long userId) throws RoomAlreadyCreatedException, UserBannedException {
+        roomService.createRoom(name, typeRoom, userId);
+        return ResponseEntity.ok("Комната успешно создана");
     }
 
-    @DeleteMapping("/remove/{roomId}/{userId}")
-    public ResponseEntity deleteRoomById(@PathVariable Long roomId, @PathVariable Long userId) {
-        try {
-            roomService.deleteRoom(roomId, userId);
+    @DeleteMapping("/remove/{roomId}")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity deleteRoomById(@PathVariable Long roomId) throws NoAccessException, RoomNotFoundException {
+            roomService.deleteRoom(roomId);
             return ResponseEntity.ok("Комната успешно удалён");
-        } catch (RoomNotFoundException | NoAccessException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
     }
 
     @PutMapping("/rename")
-    public ResponseEntity renameRoom(@RequestParam Long roomId, @RequestParam Long userId, @RequestParam String name) {
-        try {
-            roomService.renameRoom(roomId, userId, name);
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    public ResponseEntity renameRoom(@RequestParam Long roomId,  @RequestParam String name) throws RoomNotFoundException, LogicException, NoAccessException {
+            roomService.renameRoom(roomId, name);
             return ResponseEntity.ok("Комната переименована");
-        } catch (RoomNotFoundException | LogicException | NoAccessException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Произошла непонятная ошибка");
-        }
     }
 }

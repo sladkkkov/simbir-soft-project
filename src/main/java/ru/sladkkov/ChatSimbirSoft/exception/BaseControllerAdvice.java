@@ -16,53 +16,62 @@ import java.util.Map;
 public class BaseControllerAdvice {
 
     @ExceptionHandler(UserNotFoundException.class)
-    public Object userNotFoundException(UserNotFoundException ex){
+    public Object userNotFoundException(UserNotFoundException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(UserBannedException.class)
-    public Object userBannedException(UserBannedException ex){
+    public Object userBannedException(UserBannedException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(UserAlreadyCreatedException.class)
-    public Object userAlreadyCreatedException(UserAlreadyCreatedException ex){
+    public Object userAlreadyCreatedException(UserAlreadyCreatedException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(RoomNotFoundException.class)
-    public Object roomNotFoundException(RoomNotFoundException ex){
+    public Object roomNotFoundException(RoomNotFoundException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(RoomListNotFoundException.class)
-    public Object roomListNotFoundException(RoomListNotFoundException ex){
+    public Object roomListNotFoundException(RoomListNotFoundException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(RoomAlreadyCreatedException.class)
-    public Object roomAlreadyCreatedException(RoomAlreadyCreatedException ex){
+    public Object roomAlreadyCreatedException(RoomAlreadyCreatedException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(NoAccessException.class)
-    public Object noAccessException(NoAccessException ex){
+    public Object noAccessException(NoAccessException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(MessageNotFoundException.class)
-    public Object messageNotFoundException(MessageNotFoundException ex){
+    public Object messageNotFoundException(MessageNotFoundException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(MessageAlreadyCreatedException.class)
-    public Object messageAlreadyCreatedException(MessageAlreadyCreatedException ex){
+    public Object messageAlreadyCreatedException(MessageAlreadyCreatedException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
+
     @ExceptionHandler(LogicException.class)
-    public Object logicException(LogicException ex){
+    public Object logicException(LogicException ex) {
         return response(HttpStatus.INTERNAL_SERVER_ERROR, ex);
     }
 
 
-    private Object response(HttpStatus status, AbstractException ex){
+    private Object response(HttpStatus status, AbstractException ex) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
-        Map<String,String> body = new HashMap<>();
+        Map<String, String> body = new HashMap<>();
         body.put("message", ex.getMessage());
         body.put("status", status.toString());
-        return new ResponseEntity<>(body,headers,status);
+        return new ResponseEntity<>(body, headers, status);
     }
 }

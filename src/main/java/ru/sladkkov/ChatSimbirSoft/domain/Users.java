@@ -17,13 +17,13 @@ public class Users {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(name = "user_login")
+    @Column(name = "login")
     private String userLogin;
 
-    @Column(name = "user_name")
+    @Column(name = "name")
     private String userName;
 
-    @Column(name = "user_password")
+    @Column(name = "password")
     private String userPassword;
 
     @Enumerated(value = EnumType.STRING)
