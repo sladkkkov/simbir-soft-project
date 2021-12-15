@@ -2,13 +2,16 @@ package ru.sladkkov.ChatSimbirSoft.service;
 
 import lombok.extern.log4j.Log4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.sladkkov.ChatSimbirSoft.domain.Role;
 import ru.sladkkov.ChatSimbirSoft.domain.Status;
 import ru.sladkkov.ChatSimbirSoft.domain.Users;
+import ru.sladkkov.ChatSimbirSoft.dto.request.UsersRequestDto;
 import ru.sladkkov.ChatSimbirSoft.dto.response.UsersDto;
 import ru.sladkkov.ChatSimbirSoft.exception.LogicException;
-import ru.sladkkov.ChatSimbirSoft.exception.NoAccessException;
 import ru.sladkkov.ChatSimbirSoft.exception.UserAlreadyCreatedException;
 import ru.sladkkov.ChatSimbirSoft.exception.UserNotFoundException;
 import ru.sladkkov.ChatSimbirSoft.mapper.UsersMapper;
@@ -27,48 +30,46 @@ public class UsersService {
     private final RoomListRepo roomListRepo;
 
     @Autowired
-    public UsersService(UserRepo userRepo, RoomListRepo roomListRepo  ) {
+    public UsersService(UserRepo userRepo, RoomListRepo roomListRepo) {
         this.userRepo = userRepo;
         this.roomListRepo = roomListRepo;
     }
-
-
 
     /**
      * Метод получения всех пользователей.
      * Доступно для USER, MODERATOR, ADMIN, BLOCKED USER.
      */
-    public List<UsersDto> getAll() throws UserNotFoundException {
+    public List<UsersRequestDto> getAll() throws UserNotFoundException {
         List<Users> usersList = userRepo.findAll();
         if (usersList.size() == 0) {
             log.error("IN getAll users not found");
             throw new UserNotFoundException("Пользователей не найдено");
         }
         log.info("IN getAll " + usersList.size() + " users found");
-        return UsersMapper.INSTANCE.toModelList(usersList);
+        return UsersMapper.userInstance.toModelList(usersList);
     }
 
     /**
      * Метод получения пользователя по id.
      */
-    public UsersDto getById(Long id) throws UserNotFoundException {
+    public UsersRequestDto getById(Long id) throws UserNotFoundException {
         Users user = userRepo.findById(id).orElse(null);
         if (user == null) {
             log.error("IN getById user by ID: " + id + " not found");
             throw new UserNotFoundException("Пользователь с таким id не найден");
         }
         log.info("IN getById user by ID " + id + " found");
-        return UsersMapper.INSTANCE.toModel(user);
+        return UsersMapper.userInstance.toModel(user);
     }
 
     /**
      * Метод получения пользователя по name.
      */
-    public UsersDto findByUserLogin(String login) throws UserNotFoundException {
+    public UsersRequestDto findByUserLogin(String login) throws UserNotFoundException {
         Users user = userRepo.findByUserLogin(login).orElseThrow(()
-                -> new UserNotFoundException("Пользователь с таким name не найден"));
+                -> new UserNotFoundException("Пользователь с таким именем не найден"));
         log.info("IN getById user by name " + login + " found");
-        return UsersMapper.INSTANCE.toModel(user);
+        return UsersMapper.userInstance.toModel(user);
     }
 
     /**
@@ -88,65 +89,61 @@ public class UsersService {
      * Метод регистрации пользователя.
      */
     public void createUsers(UsersDto usersDto) throws UserAlreadyCreatedException {
-        Users user = userRepo.findById(UsersMapper.INSTANCE.toEntity(usersDto).getUserId()).orElse(null);
-       if (user != null) {
+        if (userRepo.findByUserLogin(usersDto.getUserLogin()).orElse(null) != null) {
             log.error("IN createUser user already created");
             throw new UserAlreadyCreatedException("Такой пользователь уже существует");
         }
-        user.setRole(Role.USER);
-        user.setStatus(Status.ACTIVE);
+        Users user1 = UsersMapper.userInstance.toEntity(usersDto);
+        user1.setRole(Role.USER);
+        user1.setStatus(Status.ACTIVE);
+        user1.setUserPassword(new BCryptPasswordEncoder(12).encode(usersDto.getUserPassword()));
         log.info("IN createUser user created");
-        userRepo.save(user);
+        userRepo.save(user1);
     }
 
     /**
      * Метод бана пользователя по id.
      * Доступно для MODERATOR, ADMIN.
      */
-    public void blockUser(Long userId, Long moderatorOrAdministratorId, Long roomId) throws UserNotFoundException, LogicException, NoAccessException {
+    public void blockUser(Long userId) throws UserNotFoundException, LogicException {
         Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             log.error("IN blockUser user by ID: " + userId + " not found");
             throw new UserNotFoundException("Пользователь с таким id не найден");
         }
-        if (user.getStatus().name().equals(Status.BANNED)) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userDetails.getUsername().equals(user.getUserLogin())) {
+            log.error("IN blockUser Administrator and user match");
+            throw new LogicException("Administrator не может забанить сам себя");
+        }
+        if (user.getStatus().equals(Status.BANNED)) {
             log.error("IN blockUser user by ID: " + userId + " already blocked on site");
-            throw new UserNotFoundException("Пользователь с таким id уже заблокирован на сайте");
-        }
-        if (moderatorOrAdministratorId == user.getUserId()) {
-            log.error("IN blockUser moderatorOrAdministrator and user match");
-            throw new LogicException("moderatorOrAdministrator не может забанить сам себя");
-        }
-        if (roomListRepo.getByUserIdAndRoomRoomId(moderatorOrAdministratorId, roomId).getRoles().getRole() == "USER") {
-            log.error("IN blockUser no access");
-            throw new NoAccessException("Нет доступа");
+            throw new LogicException("Пользователь с таким id уже заблокирован на сайте");
         }
         log.info("IN blockUser user was blocked");
         userRepo.getById(userId).setStatus(Status.BANNED);
+
+
     }
 
     /**
      * Метод разблокировки пользователя по id.
      * Доступно для MODERATOR, ADMIN.
      */
-    public void unblockUser(Long userId, Long moderatorOrAdministratorId, Long roomId) throws UserNotFoundException, LogicException, NoAccessException {
+    public void unblockUser(Long userId) throws UserNotFoundException, LogicException {
         Users user = userRepo.findById(userId).orElse(null);
-        Users moderatorOrAdministrator = userRepo.findById(moderatorOrAdministratorId).orElse(null);
         if (user == null) {
             log.error("IN unblockUser user by ID: " + userId + " not found");
             throw new UserNotFoundException("Пользователь с таким id не найден");
         }
-        if (user.getStatus().equals(Status.BANNED)) {
+        if (user.getStatus().equals(Status.ACTIVE)) {
             log.error("IN unblockUser user by ID: " + userId + "  unblock on site");
             throw new UserNotFoundException("Пользователь с таким id не заблокирован на сайте");
         }
-        if (moderatorOrAdministratorId == user.getUserId()) {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (userRepo.findByUserLogin(userDetails.getUsername()).equals(user)) {
             log.error("IN unblockUser moderatorOrAdministrator and user match");
             throw new LogicException("moderatorOrAdministrator не может разбанить сам себя");
-        }
-        if (roomListRepo.getByUserIdAndRoomRoomId(moderatorOrAdministratorId, roomId).getRoles().getRole() == "USER") {
-            log.error("IN blockUser no access");
-            throw new NoAccessException("Нет доступа");
         }
         log.info("IN unblockUser user was unlocked");
         userRepo.getById(userId).setStatus(Status.ACTIVE);
@@ -156,9 +153,10 @@ public class UsersService {
      * Метод назначеня модератора.
      * Доступно для ADMIN.
      */
-    public void setModerator(Long userId, Long administratorId, Long roomId) throws UserNotFoundException, LogicException, NoAccessException {
+    public void setModerator(Long userId, Long roomId) throws UserNotFoundException {
         Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
+
             log.error("IN setModerator user by ID: " + userId + " not found");
             throw new UserNotFoundException("Пользователь с таким id не найден");
         }
@@ -166,24 +164,15 @@ public class UsersService {
             log.error("IN setModerator user by ID: " + userId + "  blocked on site");
             throw new UserNotFoundException("Пользователь с таким id заблокирован на сайте");
         }
-        if (!roomListRepo.getByUserIdAndRoomRoomId(userId, roomId).getRoles().getRole().equals("USER")) {
-            log.error("IN setModerator userId is user");
-            throw new LogicException("Такой пользователь не может являться модератором");
-        }
-        if (!roomListRepo.getByUserIdAndRoomRoomId(administratorId, roomId).getRoles().getRole().equals("ADMIN")) {
-            log.error("IN setModerator no access");
-            throw new NoAccessException("Нет доступа");
-        }
         log.info("IN setModerator setModerator");
-        roomListRepo.getByUserIdAndRoomRoomId(userId, roomId).getRoles().setRole("MODERATOR");
     }
 
     /**
      * Метод снятия прав модератора.
      * Доступно для ADMIN.
      */
-    public void deleteModerator(Long userId, Long administratorId, Long roomId) throws
-            UserNotFoundException, LogicException, NoAccessException {
+    public void deleteModerator(Long userId, Long roomId) throws
+            UserNotFoundException {
         Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
             log.error("IN deleteModerator user by ID: " + userId + " not found");
@@ -193,16 +182,7 @@ public class UsersService {
             log.error("IN deleteModerator user by ID: " + userId + "  blocked on site");
             throw new UserNotFoundException("Пользователь с таким id заблокирован на сайте");
         }
-        if (roomListRepo.getByUserIdAndRoomRoomId(userId, roomId).getRoles().getRole().equals("USER")) {
-            log.error("IN deleteModerator userId is user");
-            throw new LogicException("Такой пользователь не может являться модератором");
-        }
-        if (!roomListRepo.getByUserIdAndRoomRoomId(administratorId, roomId).getRoles().getRole().equals("ADMIN")) {
-            log.error("IN deleteModerator no access");
-            throw new NoAccessException("Нет доступа");
-        }
         log.info("IN deleteModerator deleteModerator");
-        roomListRepo.getByUserIdAndRoomRoomId(userId, roomId).getRoles().setRole("USER");
     }
 }
 

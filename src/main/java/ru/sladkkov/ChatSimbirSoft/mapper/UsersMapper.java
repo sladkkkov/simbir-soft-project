@@ -5,6 +5,7 @@ import org.mapstruct.factory.Mappers;
 import ru.sladkkov.ChatSimbirSoft.domain.Role;
 import ru.sladkkov.ChatSimbirSoft.domain.Status;
 import ru.sladkkov.ChatSimbirSoft.domain.Users;
+import ru.sladkkov.ChatSimbirSoft.dto.request.UsersRequestDto;
 import ru.sladkkov.ChatSimbirSoft.dto.response.UsersDto;
 
 import java.util.List;
@@ -12,11 +13,11 @@ import java.util.List;
 @Mapper(uses = {Role.class, Status.class})
 public interface UsersMapper {
 
-    UsersMapper INSTANCE = Mappers.getMapper(UsersMapper.class);
+    UsersMapper userInstance = Mappers.getMapper(UsersMapper.class);
 
-    UsersDto toModel(Users users);
+    UsersRequestDto toModel(Users users);
 
     Users toEntity(UsersDto userDto);
 
-     List<UsersDto> toModelList(List<Users> users);
+     List<UsersRequestDto> toModelList(List<Users> users);
 }

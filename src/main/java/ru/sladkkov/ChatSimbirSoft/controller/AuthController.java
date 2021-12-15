@@ -13,10 +13,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.sladkkov.ChatSimbirSoft.domain.Users;
 import ru.sladkkov.ChatSimbirSoft.dto.request.AuthenticationRequestDto;
+import ru.sladkkov.ChatSimbirSoft.exception.NotAuthenticationException;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 import ru.sladkkov.ChatSimbirSoft.security.JwtTokenProvider;
 import ru.sladkkov.ChatSimbirSoft.service.AuthService;
 
+import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.util.HashMap;
@@ -30,11 +32,13 @@ public class AuthController {
     private final UserRepo userRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
+    private final AuthService authService;
 
-    public AuthController(AuthenticationManager authenticationManager, UserRepo userRepository, JwtTokenProvider jwtTokenProvider) {
+    public AuthController(AuthenticationManager authenticationManager, UserRepo userRepository, JwtTokenProvider jwtTokenProvider, AuthService authService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
         this.jwtTokenProvider = jwtTokenProvider;
+        this.authService = authService;
     }
 
     @PostMapping("/login")
@@ -48,13 +52,13 @@ public class AuthController {
             response.put("token", token);
             return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
-            return new ResponseEntity<>("Неверный токен", HttpStatus.FORBIDDEN);
+            return new ResponseEntity<>("Неверные данные, попросите администратора зарегистрировать вас", HttpStatus.FORBIDDEN);
         }
     }
 
     @PostMapping("/logout")
-    public void logout(HttpServletRequest request, HttpServletResponse response) {
-        SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
-        securityContextLogoutHandler.logout(request, response, null);
+    public ResponseEntity logout(HttpServletRequest request, HttpServletResponse response) throws LoginException, NotAuthenticationException {
+        authService.logout(request,response);
+        return ResponseEntity.ok("Вы успешно вышли из аккаунта");
     }
 }

@@ -4,6 +4,10 @@ import lombok.Data;
 
 @Data
 public class RoomRequestDto {
-    private long roomId;
 
+    private long ownerId;
+
+    private String roomName;
+
+    private String roomType;
 }

@@ -1,13 +1,15 @@
 package ru.sladkkov.ChatSimbirSoft.domain;
 
+import lombok.Getter;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Set;
 import java.util.stream.Collectors;
-
+@Getter
 public enum Role {
     USER(Set.of(Permission.USER)),
-    ADMIN(Set.of(Permission.ADMIN, Permission.USER));
+    ADMIN(Set.of(Permission.ADMIN, Permission.USER)),
+    MODERATOR(Set.of(Permission.MODERATOR, Permission.USER));
 
     private final Set<Permission> permissionSet;
 

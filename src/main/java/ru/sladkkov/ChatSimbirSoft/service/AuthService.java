@@ -2,17 +2,22 @@ package ru.sladkkov.ChatSimbirSoft.service;
 
 
 import lombok.extern.log4j.Log4j2;
+import org.apache.tomcat.util.http.parser.Authorization;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.stereotype.Service;
 import ru.sladkkov.ChatSimbirSoft.domain.Users;
 import ru.sladkkov.ChatSimbirSoft.dto.request.AuthenticationRequestDto;
 import ru.sladkkov.ChatSimbirSoft.exception.JwtAuthenticationException;
+import ru.sladkkov.ChatSimbirSoft.exception.NotAuthenticationException;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 import ru.sladkkov.ChatSimbirSoft.security.JwtTokenProvider;
 
+import javax.security.auth.login.LoginException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.transaction.Transactional;
@@ -43,9 +48,9 @@ public class AuthService {
         Map<Object, Object> response = new HashMap<>();
         response.put("login", authenticationRequestDto.getLogin());
         response.put("token", token);
-        return  response;
+        return response;
     }
-    public void logout(HttpServletRequest request, HttpServletResponse response) throws JwtAuthenticationException{
+    public void logout(HttpServletRequest request, HttpServletResponse response) throws JwtAuthenticationException, LoginException, NotAuthenticationException {
         SecurityContextLogoutHandler securityContextLogoutHandler = new SecurityContextLogoutHandler();
         securityContextLogoutHandler.logout(request, response, null);
     }

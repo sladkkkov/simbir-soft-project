@@ -62,7 +62,8 @@ public class RoomListService {
         return RoomListMapper.INSTANCE.toModelList(roomList);
     }
 
-    public void createRoomList(String name, String typeRoom, Long userId) throws RoomAlreadyCreatedException, UserBannedException, LogicException {
+    public void createRoomList(String name, String typeRoom, Long userId) throws UserBannedException, LogicException {
+
         if (!userRepo.findById(userId).orElse(null).getStatus().name().equals("ACTIVE")) {
             log.error("IN createRoom create room failed, user don't Active");
             throw new UserBannedException("Пользователь забанен на сайте");

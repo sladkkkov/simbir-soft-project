@@ -1,16 +1,22 @@
 package ru.sladkkov.ChatSimbirSoft.service;
 
 import lombok.extern.log4j.Log4j;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.sladkkov.ChatSimbirSoft.domain.Room;
+import ru.sladkkov.ChatSimbirSoft.domain.*;
 import ru.sladkkov.ChatSimbirSoft.dto.response.RoomDto;
+import ru.sladkkov.ChatSimbirSoft.dto.response.RoomListDto;
 import ru.sladkkov.ChatSimbirSoft.exception.*;
+import ru.sladkkov.ChatSimbirSoft.mapper.RoomListMapper;
 import ru.sladkkov.ChatSimbirSoft.mapper.RoomMapper;
-import ru.sladkkov.ChatSimbirSoft.repository.RolesRepo;
+import ru.sladkkov.ChatSimbirSoft.mapper.UsersMapper;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 
+import javax.persistence.GeneratedValue;
 import javax.transaction.Transactional;
 import java.util.List;
 
@@ -21,16 +27,14 @@ public class RoomService {
 
     private final RoomRepo roomRepo;
     private final UserRepo userRepo;
-    private final RolesRepo rolesRepo;
     private final RoomListRepo roomListRepo;
 
-
-    public RoomService(RoomRepo roomRepo, UserRepo userRepo, RolesRepo rolesRepo, RoomListRepo roomListRepo) {
+    public RoomService(RoomRepo roomRepo, UserRepo userRepo, RoomListRepo roomListRepo) {
         this.roomRepo = roomRepo;
         this.userRepo = userRepo;
-        this.rolesRepo = rolesRepo;
         this.roomListRepo = roomListRepo;
     }
+
     /**
      * Метод получения всех комнат.
      */
@@ -42,6 +46,7 @@ public class RoomService {
         log.info("IN getAllRoom rooms successfully founded");
         return RoomMapper.INSTANCE.toModelList(roomRepo.findAll());
     }
+
     /**
      * Метод получения комнаты по id.
      */
@@ -54,24 +59,34 @@ public class RoomService {
         log.info("IN getRoom room successfully founded");
         return RoomMapper.INSTANCE.toModel(room);
     }
+
     /**
      * Метод создания комнаты.
      * Доступен всем кроме заблокированного пользователя
      */
-    public void createRoom(String name, String typeRoom, Long userId) throws RoomAlreadyCreatedException, UserBannedException {
-        if (!userRepo.findById(userId).orElse(null).getStatus().name().equals("ACTIVE")) {
+    public void createRoom(String name, String typeRoom) throws UserBannedException {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userRepo.findByUserLogin(userDetails.getUsername()).orElse(null);
+        if (user.getStatus().equals(Status.BANNED)) {
             log.error("IN createRoom create room failed, user don't Active");
             throw new UserBannedException("Пользователь забанен на сайте");
         }
-        if (typeRoom == "c"){
-            RoomDto roomDto = new RoomDto(userId,name,"private");
+        if (typeRoom == "c") {
+            RoomDto roomDto = new RoomDto(user.getUserId(), name, "private");
             log.info("IN createRoom room private room created");
+            roomRepo.save(RoomMapper.INSTANCE.toEntity(roomDto));
+
 
         }
-        RoomDto roomDto = new RoomDto(userId,name,"public");
-        roomRepo.save(RoomMapper.INSTANCE.toEntity(roomDto));
+
+        Room room = new Room(user.getUserId(), name, "public");
+/*
+        RoomList roomList = new RoomList(user.getUserId(), null, Role.MODERATOR, user, room);
+*/
+        roomRepo.save(room);
         log.info("IN createRoom room public room created");
     }
+
     /**
      * Метод удаления комнаты по id.
      * Доступно для ADMIN или Владельца комнаты.
@@ -84,17 +99,18 @@ public class RoomService {
         log.info("In deleteRoom room successful deleted");
         roomRepo.deleteById(roomId);
     }
+
     /**
      * Метод переименования комнаты по id.
      * Доступно для ADMIN или Владельца комнаты.
      */
     public void renameRoom(Long roomId, String name) throws RoomNotFoundException, LogicException, NoAccessException {
         Room room = roomRepo.findById(roomId).orElse(null);
-        if(room == null){
+        if (room == null) {
             log.error("IN renameRoom room not found");
             throw new RoomNotFoundException("Комната не найдена");
         }
-        if(room.getRoomName() == name){
+        if (room.getRoomName() == name) {
             log.error("IN renameRoom room is already so named");
             throw new LogicException("Комната уже так названа");
         }

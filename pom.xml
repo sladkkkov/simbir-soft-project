@@ -8,6 +8,7 @@
         <version>2.5.6</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
+
     <groupId>ru.sladkkov</groupId>
     <artifactId>ChatSimbirSoft</artifactId>
     <version>0.0.1-SNAPSHOT</version>
@@ -19,6 +20,8 @@
         <flyway.schemas>public</flyway.schemas>
         <org.mapstruct.version>1.4.2.Final</org.mapstruct.version>
         <org.projectlombok.version>1.18.22</org.projectlombok.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -85,11 +88,13 @@
             <scope>test</scope>
         </dependency>
 
+
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>
             <scope>test</scope>
         </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/org.flywaydb/flyway-core -->
         <dependency>
@@ -97,6 +102,7 @@
             <artifactId>flyway-core</artifactId>
             <version>8.0.3</version>
         </dependency>
+
 
         <!-- https://mvnrepository.com/artifact/log4j/log4j -->
         <dependency>

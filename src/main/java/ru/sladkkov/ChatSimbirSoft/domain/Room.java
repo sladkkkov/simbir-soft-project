@@ -28,5 +28,11 @@ public class Room {
 
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "room")
     private List<Message> messageList;
+
+    public Room(Long ownerId, String roomName, String roomType) {
+        this.ownerId = ownerId;
+        this.roomName = roomName;
+        this.roomType = roomType;
+    }
 }
 

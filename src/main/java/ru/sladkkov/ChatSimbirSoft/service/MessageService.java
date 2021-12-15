@@ -64,11 +64,6 @@ public class MessageService {
             log.error("IN deleteById message dont found");
             throw new MessageNotFoundException("Такого сообщения не существует");
         }
-        if(roomListRepo.getByUserIdAndRoomRoomId(userId,message.getRoom().getRoomId()).getRoles().getRole() != "MODERATOR"
-                || roomListRepo.getByUserIdAndRoomRoomId(userId,message.getRoom().getRoomId()).getRoles().getRole() != "ADMIN" ){
-            log.error("IN deleteById no access");
-            throw new NoAccessException("Нет прав на удаление сообщения");
-        }
         log.info("IN deleteById message deleted");
         messageRepo.deleteById(messageId);
     }
@@ -85,7 +80,7 @@ public class MessageService {
         }
         if(roomListRepo.getByUserIdAndRoomRoomId(message.getUsers().getUserId(),message.getRoom().getRoomId()) == null){
             log.error("IN createMessage user dont consist of room");
-            throw new LogicException("Пользователь не добавлен в комнату");
+            throw new LogicException("aa не добавлен в комнату");
         }
         if(!message.getUsers().getStatus().name().equals("ACTIVE")){
             log.error("IN createMessage user blocked");
