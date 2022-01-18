@@ -1,16 +1,25 @@
 package ru.sladkkov.ChatSimbirSoft.service;
 
 import lombok.extern.log4j.Log4j2;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import ru.sladkkov.ChatSimbirSoft.domain.Message;
+import ru.sladkkov.ChatSimbirSoft.domain.Status;
+import ru.sladkkov.ChatSimbirSoft.domain.Users;
+import ru.sladkkov.ChatSimbirSoft.dto.request.MessageRequestDto;
 import ru.sladkkov.ChatSimbirSoft.dto.response.MessageDto;
 import ru.sladkkov.ChatSimbirSoft.exception.*;
+import ru.sladkkov.ChatSimbirSoft.mapper.MessageMapper;
 import ru.sladkkov.ChatSimbirSoft.repository.MessageRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
-import ru.sladkkov.ChatSimbirSoft.mapper.MessageMapper;
+import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 
 import javax.transaction.Transactional;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Service
@@ -19,19 +28,21 @@ import java.util.List;
 public class MessageService {
     private final MessageRepo messageRepo;
     private final RoomRepo roomRepo;
-    private  final RoomListRepo roomListRepo;
+    private final RoomListRepo roomListRepo;
+    private final UserRepo userRepo;
 
-    public MessageService(MessageRepo messageRepo, RoomRepo roomRepo, RoomListRepo roomListRepo) {
+    public MessageService(MessageRepo messageRepo, RoomRepo roomRepo, RoomListRepo roomListRepo, UserRepo userRepo) {
         this.messageRepo = messageRepo;
         this.roomRepo = roomRepo;
         this.roomListRepo = roomListRepo;
+        this.userRepo = userRepo;
     }
 
     /**
      * Метод получения всех сообщений по id.
      * Доступно для USER, MODERATOR, ADMIN, BLOCKED USER.
      */
-    public List<MessageDto> getAllMessage() throws MessageNotFoundException {
+    public List<MessageRequestDto> getAllMessage() throws MessageNotFoundException {
         List<Message> messageList = messageRepo.findAll();
         if (messageList.size() == 0) {
             log.error("IN getAllMessage messages not found");
@@ -44,7 +55,7 @@ public class MessageService {
     /**
      * Метод получения сообщения по id.
      */
-    public MessageDto getMessageById(Long id) throws MessageNotFoundException {
+    public MessageRequestDto getMessageById(Long id) throws MessageNotFoundException {
         Message message = messageRepo.findById(id).orElse(null);
         if (message == null) {
             log.error("IN getMessageById message not found");
@@ -58,7 +69,7 @@ public class MessageService {
      * Метод удаления сообщения.
      * Доступно для MODERATOR, ADMIN.
      */
-    public void deleteById(Long messageId, Long userId) throws MessageNotFoundException, NoAccessException {
+    public void deleteById(Long messageId) throws MessageNotFoundException, NoAccessException {
         Message message = messageRepo.findById(messageId).orElse(null);
         if (message == null) {
             log.error("IN deleteById message dont found");
@@ -71,23 +82,28 @@ public class MessageService {
     /**
      * Метод отправки сообщения.
      * Доступно для USER, MODERATOR, ADMIN.
+     *
+     * @return
      */
-    public void createMessage(MessageDto messageDto) throws MessageAlreadyCreatedException, UserBannedException, LogicException {
-        Message message = MessageMapper.INSTANCE.toEntity(messageDto);
-        if (messageRepo.findById(messageDto.getMessageId()).orElse(null) != null) {
-            log.error("IN createMessage message already created");
-            throw new MessageAlreadyCreatedException("Сообщение c таким id уже существует");
-        }
-        if(roomListRepo.getByUserIdAndRoomRoomId(message.getUsers().getUserId(),message.getRoom().getRoomId()) == null){
-            log.error("IN createMessage user dont consist of room");
-            throw new LogicException("aa не добавлен в комнату");
-        }
-        if(!message.getUsers().getStatus().name().equals("ACTIVE")){
+    public ResponseEntity createMessage(MessageDto messageDto) throws UserBannedException, LogicException {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userRepo.findByUserLogin(userDetails.getUsername()).orElse(null);
+        user.setMessageList(null);
+        messageDto.setUsers(user);
+
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
+        if (user.getStatus().equals(Status.BANNED)) {
             log.error("IN createMessage user blocked");
             throw new UserBannedException("Пользователь заблокирован на сайте");
         }
-        log.info("IN createMessage message created");
+        Message message = MessageMapper.INSTANCE.toEntity(messageDto);
+        message.setMessageText(messageDto.getMessageText());
+        message.setRoom(messageDto.getRoom());
+        message.setMessageTime(timestamp);
         messageRepo.save(message);
+        log.info("IN createMessage message created");
+        return ResponseEntity.ok("Сообщение успешно создано");
     }
 
     /**

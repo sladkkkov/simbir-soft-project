@@ -3,20 +3,15 @@ package ru.sladkkov.ChatSimbirSoft.service;
 import lombok.extern.log4j.Log4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.sladkkov.ChatSimbirSoft.domain.*;
 import ru.sladkkov.ChatSimbirSoft.dto.response.RoomDto;
-import ru.sladkkov.ChatSimbirSoft.dto.response.RoomListDto;
 import ru.sladkkov.ChatSimbirSoft.exception.*;
-import ru.sladkkov.ChatSimbirSoft.mapper.RoomListMapper;
 import ru.sladkkov.ChatSimbirSoft.mapper.RoomMapper;
-import ru.sladkkov.ChatSimbirSoft.mapper.UsersMapper;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 
-import javax.persistence.GeneratedValue;
 import javax.transaction.Transactional;
 import java.util.List;
 
@@ -64,7 +59,7 @@ public class RoomService {
      * Метод создания комнаты.
      * Доступен всем кроме заблокированного пользователя
      */
-    public void createRoom(String name, String typeRoom) throws UserBannedException {
+    public void createRoom(String name, String typeRoom) throws UserBannedException, RoomAlreadyCreatedException {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Users user = userRepo.findByUserLogin(userDetails.getUsername()).orElse(null);
         if (user.getStatus().equals(Status.BANNED)) {
@@ -75,15 +70,15 @@ public class RoomService {
             RoomDto roomDto = new RoomDto(user.getUserId(), name, "private");
             log.info("IN createRoom room private room created");
             roomRepo.save(RoomMapper.INSTANCE.toEntity(roomDto));
-
-
         }
-
+        if(roomRepo.getByRoomName(name).orElse(null) != null){
+            log.error("IN createRoom create room failed");
+            throw new RoomAlreadyCreatedException("Комната с таким названием уже создана");
+        }
+        user.setMessageList(null);
         Room room = new Room(user.getUserId(), name, "public");
-/*
-        RoomList roomList = new RoomList(user.getUserId(), null, Role.MODERATOR, user, room);
-*/
         roomRepo.save(room);
+        roomListRepo.save(new RoomList(new RoomListId(room.getRoomId(),user.getUserId()), null, Role.MODERATOR));
         log.info("IN createRoom room public room created");
     }
 
@@ -97,6 +92,8 @@ public class RoomService {
             throw new RoomNotFoundException("Комната не найдена");
         }
         log.info("In deleteRoom room successful deleted");
+
+        roomListRepo.deleteAllById_RoomListId(roomId);
         roomRepo.deleteById(roomId);
     }
 
@@ -110,7 +107,7 @@ public class RoomService {
             log.error("IN renameRoom room not found");
             throw new RoomNotFoundException("Комната не найдена");
         }
-        if (room.getRoomName() == name) {
+        if (room.getRoomName().equals(name)) {
             log.error("IN renameRoom room is already so named");
             throw new LogicException("Комната уже так названа");
         }

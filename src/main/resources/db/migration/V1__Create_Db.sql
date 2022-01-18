@@ -1,4 +1,3 @@
-
 create table message
 (
     message_id   bigserial not null,
@@ -23,19 +22,21 @@ create table room
     type_room varchar(255),
     primary key (room_id)
 );
+
 create table room_list
 (
-    user_id  int8 not null,
-    ban_time timestamp,
-    roles    varchar(255),
-    room_id  int8 not null,
-    primary key (user_id,room_id)
+    room_list_id int8 not null,
+    user_list_id int8 not null,
+    ban_time     timestamp,
+    roles        varchar(255),
+    primary key (room_list_id, user_list_id)
 );
+
 create table users
 (
-    user_id       bigserial not null,
-    role          varchar(255),
-    status        varchar(255),
+    user_id  bigserial not null,
+    role     varchar(255),
+    status   varchar(255),
     login    varchar(255),
     name     varchar(255),
     password varchar(255),
@@ -46,9 +47,13 @@ alter table message
 alter table message
     add constraint fk_user_id foreign key (user_id) references users;
 alter table room_list
-    add constraint fk_roles foreign key (roles) references roles;
+    add constraint fk_room_id foreign key (room_list_id) references room;
 alter table room_list
-    add constraint fk_room_id foreign key (room_id) references room;
-alter table room_list
-    add constraint fk_users_id foreign key (user_id) references users;
+    add constraint fk_users_id foreign key (user_list_id) references users;
+
+alter table room
+    alter column room_name set not null;
+
+create unique index room_room_name_uindex
+    on room (room_name);
 

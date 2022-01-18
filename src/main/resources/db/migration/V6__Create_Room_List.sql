@@ -1,5 +1,6 @@
-INSERT INTO public.room_list (user_id, ban_time, roles, room_id)
-VALUES (1, null, 'MODERATOR', 1);
+INSERT INTO public.room_list (room_list_id, user_list_id, ban_time, roles)
+VALUES (1, 1, null, 'ADMIN');
 
-INSERT INTO public.room_list (user_id, ban_time, roles, room_id)
-VALUES (1, null, 'MODERATOR', 2);
+INSERT INTO public.room_list (room_list_id, user_list_id, ban_time, roles )
+VALUES (2, 1, null, 'ADMIN');
+

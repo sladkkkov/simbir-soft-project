@@ -31,7 +31,7 @@ public class RoomController {
 
     @PostMapping("/create/{name}/{typeRoom}")
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public ResponseEntity createRoom(@PathVariable String name, @PathVariable String typeRoom) throws UserBannedException {
+    public ResponseEntity createRoom(@PathVariable String name, @PathVariable String typeRoom) throws UserBannedException, RoomAlreadyCreatedException {
         roomService.createRoom(name, typeRoom);
         return ResponseEntity.ok("Комната успешно создана");
     }

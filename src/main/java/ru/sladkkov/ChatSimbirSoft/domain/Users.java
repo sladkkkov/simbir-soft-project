@@ -1,8 +1,12 @@
 package ru.sladkkov.ChatSimbirSoft.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.util.List;
@@ -11,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@ToString
 @Table(name = "users")
 public class Users {
     @Id
@@ -34,9 +39,9 @@ public class Users {
     @Column(name = "role")
     private Role role;
 
+    @JsonIgnore
     @OneToMany(cascade = CascadeType.ALL, mappedBy = "users")
     private List<Message> messageList;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "users")
-    private List<RoomList> roomList;
+
 }

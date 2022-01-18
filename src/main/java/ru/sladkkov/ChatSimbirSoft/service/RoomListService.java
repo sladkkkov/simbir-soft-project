@@ -1,21 +1,21 @@
 package ru.sladkkov.ChatSimbirSoft.service;
 
 import lombok.extern.log4j.Log4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import ru.sladkkov.ChatSimbirSoft.domain.RoomList;
-import ru.sladkkov.ChatSimbirSoft.dto.response.RoomDto;
+import ru.sladkkov.ChatSimbirSoft.domain.*;
 import ru.sladkkov.ChatSimbirSoft.dto.response.RoomListDto;
 import ru.sladkkov.ChatSimbirSoft.exception.LogicException;
-import ru.sladkkov.ChatSimbirSoft.exception.RoomAlreadyCreatedException;
 import ru.sladkkov.ChatSimbirSoft.exception.RoomListNotFoundException;
 import ru.sladkkov.ChatSimbirSoft.exception.UserBannedException;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
-import ru.sladkkov.ChatSimbirSoft.mapper.RoomListMapper;
-import ru.sladkkov.ChatSimbirSoft.mapper.RoomMapper;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -34,54 +34,128 @@ public class RoomListService {
         this.roomRepo = roomRepo;
     }
 
+    public RoomListDto toModel(RoomList roomList) {
+        if (roomList == null) {
+            return null;
+        }
+
+        RoomListDto roomListDto = new RoomListDto();
+        roomListDto.setRoomListId(roomList.getId());
+        roomListDto.setBanTime(roomList.getBanTime());
+        roomListDto.setRole(roomList.getRole());
+
+        return roomListDto;
+    }
+    public List<RoomListDto> toModelList(List<RoomList> roomListList) {
+        if (roomListList == null) {
+            return null;
+        }
+
+        List<RoomListDto> list = new ArrayList<RoomListDto>(roomListList.size());
+        for (RoomList roomList : roomListList) {
+            list.add(toModel(roomList));
+        }
+
+        return list;
+    }
+    public RoomList toEntity(RoomListDto roomListDto) {
+        if ( roomListDto == null ) {
+            return null;
+        }
+
+        RoomList roomList = new RoomList();
+        roomList.setId(roomListDto.getRoomListId());
+        roomList.setBanTime( roomListDto.getBanTime() );
+        roomList.setRole( roomListDto.getRole() );
+
+        return roomList;
+    }
+
     public List<RoomListDto> getAllRoomList() throws RoomListNotFoundException {
         if (roomListRepo.findAll().size() == 0) {
             log.error("IN getAllRoomList rooms not found");
             throw new RoomListNotFoundException("Списков не найдено");
         }
         log.info("IN getAllRoomList lists successfully founded");
-        return RoomListMapper.INSTANCE.toModelList(roomListRepo.findAll());
+        return toModelList(roomListRepo.findAll());
     }
 
-    public RoomListDto getRoomListByUserId(Long userId, Long roomId) throws RoomListNotFoundException {
-        RoomList roomList = roomListRepo.getByUserIdAndRoomRoomId(userId,roomId);
+    public RoomListDto getRoomListByUserId(Long roomId) throws RoomListNotFoundException {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userRepo.findByUserLogin(userDetails.getUsername()).orElse(null);
+        RoomList roomList = roomListRepo.findById(new RoomListId(roomId, user.getUserId())).orElse(null);
         if (roomList == null) {
             log.error("IN getRoomListById roomLists not found");
             throw new RoomListNotFoundException("Списков не найдено");
         }
         log.info("IN getRoomListById roomLists successfully founded");
-        return RoomListMapper.INSTANCE.toModel(roomList);
+        return toModel(roomList);
     }
-    public List<RoomListDto> getAllRoomByUserId(Long userId) throws RoomListNotFoundException {
-        List<RoomList> roomList = roomListRepo.getAllByUserId(userId);
-        if (roomList == null) {
-            log.error("IN getRoomListById roomLists not found");
-            throw new RoomListNotFoundException("Списков не найдено");
+
+
+    public ResponseEntity createRoomList(Long roomId) throws UserBannedException, LogicException {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userRepo.findByUserLogin(userDetails.getUsername()).orElse(null);
+
+        if(roomListRepo.findById(new RoomListId(roomId, user.getUserId())).orElse(null) != null){
+            log.error("IN createRoom create room failed");
+            throw new UserBannedException("Пользователь уже в комнате");
         }
-        log.info("IN getRoomListById roomLists successfully founded");
-        return RoomListMapper.INSTANCE.toModelList(roomList);
+        if(roomRepo.findById(roomId).orElse(null) == null){
+            log.error("IN createRoom create room failed");
+            throw new UserBannedException("Комнаты с таким id не существет");
+        }
+
+        roomListRepo.save(new RoomList(new RoomListId(roomId,user.getUserId()), null, Role.USER));
+        log.info("IN createRoom room created");
+        return ResponseEntity.ok("Пользователь успешно добавлен в комнату");
+
     }
 
-    public void createRoomList(String name, String typeRoom, Long userId) throws UserBannedException, LogicException {
-
-        if (!userRepo.findById(userId).orElse(null).getStatus().name().equals("ACTIVE")) {
+    public ResponseEntity joinRoomList(Long roomId, String userLogin) throws UserBannedException, LogicException {
+        Users user = userRepo.findByUserLogin(userLogin).orElse(null);
+        if (user.getStatus().equals(Status.BANNED)) {
             log.error("IN createRoom create room failed, user don't Active");
             throw new UserBannedException("Пользователь забанен на сайте");
         }
-        if(!typeRoom.equals("private") || !typeRoom.equals("public")){
-            log.error("IN createRoomList create room failed type room");
-            throw new LogicException("Тип комнаты private или public");
+        if(roomListRepo.findById(new RoomListId(roomId, user.getUserId())).orElse(null) != null){
+            log.error("IN createRoom create room failed");
+            throw new UserBannedException("Пользователь уже в комнате");
         }
-        roomRepo.save(RoomMapper.INSTANCE.toEntity(new RoomDto(userId,name,typeRoom)));
+        if(roomRepo.findById(roomId).orElse(null) == null){
+            log.error("IN createRoom create room failed");
+            throw new UserBannedException("Комнаты с таким id не существет");
+        }
+        if(user == null){
+            log.error("IN createRoom create room failed");
+            throw new UserBannedException("Комнаты с таким id не существет");
+        }
+
+        roomListRepo.save(new RoomList(new RoomListId(roomId,user.getUserId()), null, Role.USER));
         log.info("IN createRoom room created");
+        return ResponseEntity.ok("Пользователь успешно добавлен в комнату");
+
     }
 
-    public void deleteRoomList(Long id) throws RoomListNotFoundException {
-        if (roomListRepo.findById(id).orElse(null) == null) {
+    public void deleteRoomList(Long roomId) throws RoomListNotFoundException {
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        Users user = userRepo.findByUserLogin(userDetails.getUsername()).orElse(null);
+        if (roomListRepo.findById(new RoomListId(roomId, user.getUserId())).orElse(null) == null) {
             log.error("In deleteRoomList roomLists not found");
-            throw new RoomListNotFoundException("Список не найден");
+            throw new RoomListNotFoundException("Юзер не состоит в комнате");
         }
+
         log.info("In deleteRoomList roomLists successful deleted");
-        roomListRepo.deleteById(id);
+        roomListRepo.deleteById(new RoomListId(roomId, user.getUserId()));
+    }
+    public void deleteRoomListByUserId(String userId, Long roomId) throws RoomListNotFoundException {
+        Users user = userRepo.findByUserLogin(userId).orElse(null);
+        if (roomListRepo.findById(new RoomListId(roomId, user.getUserId())).orElse(null) == null) {
+            log.error("In deleteRoomList roomLists not found");
+            throw new RoomListNotFoundException("Юзер не состоит в комнате");
+        }
+
+        log.info("In deleteRoomList roomLists successful deleted");
+        roomListRepo.deleteById(new RoomListId(roomId,user.getUserId()));
     }
 }

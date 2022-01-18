@@ -1,39 +1,31 @@
 package ru.sladkkov.ChatSimbirSoft.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.sql.Timestamp;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
+@ToString
 @Table(name = "room_list")
-public class RoomList {
-    @Id
-    private Long userId;
+public class RoomList  {
+
+    @EmbeddedId
+    private RoomListId id;
 
     @Column(name = "ban_time")
     private Timestamp banTime;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "roles")
-    private Roles roles;
-
-
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId
-    @JoinColumn(name = "user_id")
-    private Users users;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @MapsId
-    @JoinColumn(name = "room_id")
-    private Room room;
-
-
+    @Enumerated(value = EnumType.STRING)
+    @Column(name = "roles")
+    private Role role;
 }

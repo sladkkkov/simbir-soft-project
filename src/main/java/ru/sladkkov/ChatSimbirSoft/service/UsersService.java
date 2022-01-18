@@ -6,6 +6,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.sladkkov.ChatSimbirSoft.domain.Role;
 import ru.sladkkov.ChatSimbirSoft.domain.Status;
 import ru.sladkkov.ChatSimbirSoft.domain.Users;
@@ -18,7 +19,6 @@ import ru.sladkkov.ChatSimbirSoft.mapper.UsersMapper;
 import ru.sladkkov.ChatSimbirSoft.repository.RoomListRepo;
 import ru.sladkkov.ChatSimbirSoft.repository.UserRepo;
 
-import javax.transaction.Transactional;
 import java.util.List;
 
 @Service
@@ -83,6 +83,19 @@ public class UsersService {
         }
         log.info("IN deleteUser user with " + id + " found and successful deleted");
         userRepo.deleteById(id);
+    }
+    /**
+     * Метод обновления пользователя по login.
+     */
+    public void updateUser(String login, String newLogin) throws UserNotFoundException {
+        Users user = userRepo.findByUserLogin(login).orElse(null);
+        if (user == null) {
+            log.error("IN updateUser user by login: " + login + " not found");
+            throw new UserNotFoundException("Пользователь с таким login не найден");
+        }
+        user.setUserLogin(newLogin);
+        log.info("IN deleteUser user with " + login + " found and successful deleted");
+
     }
 
     /**
@@ -153,7 +166,7 @@ public class UsersService {
      * Метод назначеня модератора.
      * Доступно для ADMIN.
      */
-    public void setModerator(Long userId, Long roomId) throws UserNotFoundException {
+    public void setModerator(Long userId) throws UserNotFoundException {
         Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
 
@@ -164,6 +177,7 @@ public class UsersService {
             log.error("IN setModerator user by ID: " + userId + "  blocked on site");
             throw new UserNotFoundException("Пользователь с таким id заблокирован на сайте");
         }
+        user.setRole(Role.ADMIN);
         log.info("IN setModerator setModerator");
     }
 
@@ -171,7 +185,7 @@ public class UsersService {
      * Метод снятия прав модератора.
      * Доступно для ADMIN.
      */
-    public void deleteModerator(Long userId, Long roomId) throws
+    public void deleteModerator(Long userId) throws
             UserNotFoundException {
         Users user = userRepo.findById(userId).orElse(null);
         if (user == null) {
@@ -182,6 +196,7 @@ public class UsersService {
             log.error("IN deleteModerator user by ID: " + userId + "  blocked on site");
             throw new UserNotFoundException("Пользователь с таким id заблокирован на сайте");
         }
+        user.setRole(Role.USER);
         log.info("IN deleteModerator deleteModerator");
     }
 }

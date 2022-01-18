@@ -17,6 +17,4 @@ public class Roles {
     @Column(name = "role")
     private String role;
 
-    @OneToMany(mappedBy = "roles", cascade = CascadeType.ALL)
-    private List<RoomList> roomListList;
 }

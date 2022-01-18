@@ -3,9 +3,8 @@ package ru.sladkkov.ChatSimbirSoft.dto.response;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.sladkkov.ChatSimbirSoft.domain.Roles;
-import ru.sladkkov.ChatSimbirSoft.domain.Room;
-import ru.sladkkov.ChatSimbirSoft.domain.Users;
+import ru.sladkkov.ChatSimbirSoft.domain.*;
+import ru.sladkkov.ChatSimbirSoft.dto.request.UsersRequestDto;
 
 import java.sql.Timestamp;
 
@@ -14,14 +13,10 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class RoomListDto {
 
-    private Long userId;
+    private RoomListId roomListId;
 
     private Timestamp banTime;
 
-    private Users users;
-
-    private Room room;
-
-    private Roles roles;
+    private Role role;
 
 }

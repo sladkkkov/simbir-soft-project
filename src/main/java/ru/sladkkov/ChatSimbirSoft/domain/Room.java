@@ -1,5 +1,6 @@
 package ru.sladkkov.ChatSimbirSoft.domain;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -26,8 +27,6 @@ public class Room {
     @Column(name = "type_room")
     private  String roomType;
 
-    @OneToMany(cascade = CascadeType.ALL, mappedBy = "room")
-    private List<Message> messageList;
 
     public Room(Long ownerId, String roomName, String roomType) {
         this.ownerId = ownerId;

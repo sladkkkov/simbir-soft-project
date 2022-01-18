@@ -65,14 +65,14 @@ public class UsersController {
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/set-moderator/{userId}/{roomId}")
     public ResponseEntity setModerator(@PathVariable Long userId, @PathVariable Long roomId) throws UserNotFoundException {
-        usersService.setModerator(userId,  roomId);
+        usersService.setModerator(userId);
         return ResponseEntity.ok("Пользователь успешно получил права модератора");
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @PutMapping("/delete-moderator/{userId}/{roomId}")
     public ResponseEntity deleteModerator(@PathVariable Long userId, @PathVariable Long roomId) throws UserNotFoundException {
-        usersService.deleteModerator(userId,  roomId);
+        usersService.deleteModerator(userId);
         return ResponseEntity.ok("Пользователь успешно утратил права модератора ");
     }
 }
